@@ -158,7 +158,7 @@ namespace PrefixPunisher
                 Config.Write(ConfigPath);
                 switch (Config.PunishType.ToLower())
                 {
-                    case "kick": case "disable": case "ban":
+                    case "kick": case "disable": case "ban": case "kill":
                     Console.WriteLine("Set up PrefixPunisher config."); break;
 
                     default: Log.Error("Incorrectly set up PrefixPunisher config! Fix value \"PunishType\"!");
@@ -190,19 +190,23 @@ namespace PrefixPunisher
             {
                 if (isIllegal(item))
                 {
-                    var name = tsply.Name;
+                    //var name = tsply.Name;
 
                     switch (Config.PunishType.ToLower())
                     {
                         case "disable":
                         {
-                            tsply.Disable("Illegally prefixed " + item.AffixName() + "!"); 
+                            tsply.LastThreat = DateTime.UtcNow;
+                            tsply.SetBuff(33, 530, true);
+                            tsply.SetBuff(32, 530, true);
+                            tsply.SetBuff(23, 330, true);
+                            tsply.SendWarningMessage("Your " + item.AffixName() + " is illegally prefixed. Dispose of it at once!");
                             return;
                         }
 
                         case "kick":
                         {
-                            TShock.Utils.ForceKick(tsply, "Illegally prefixed " + item.AffixName(), Config.AnnouncePunishes);
+                            TShock.Utils.ForceKick(tsply, "Illegally prefixed " + item.AffixName(), true);
                             return;
                         }
 
@@ -213,7 +217,7 @@ namespace PrefixPunisher
 
                             // Using the depreciated code because the current ban system doesn't kick people
                             TShock.Bans.AddBan(tsply.IP, tsply.Name, "Illegally prefixed " + sqlName);
-                            TShock.Utils.ForceKick(tsply, "Banned: Illegally prefixed " + item.AffixName(), Config.AnnouncePunishes);
+                            TShock.Utils.ForceKick(tsply, "Banned: Illegally prefixed " + item.AffixName(), true);
                             return;
                         }
                         default: return;
@@ -238,6 +242,7 @@ namespace PrefixPunisher
 
                         foreach (var item in inv)
                         {
+                            #region if it is illegal
                             if (isIllegal(item))
                             {
                                 //var name = ply.Name;
@@ -246,26 +251,41 @@ namespace PrefixPunisher
                                 {
                                     case "disable":
                                     {
-                                        ply.Disable("Illegally prefixed " + item.AffixName() + "!");
-                                        return;
+                                        ply.LastThreat = DateTime.UtcNow;
+                                        ply.SetBuff(33, 530, true);
+                                        ply.SetBuff(32, 530, true);
+                                        ply.SetBuff(23, 330, true);
+                                        ply.SendWarningMessage("Your " + item.AffixName() + " is illegally prefixed. Dispose of it at once!");
+                                        break;
                                     }
 
                                     case "kick":
                                     {
-                                        TShock.Utils.ForceKick(ply, "Illegally prefixed " + item.AffixName(), Config.AnnouncePunishes);
-                                        return;
+                                        TShock.Utils.ForceKick(ply, "Illegally prefixed " + item.AffixName(), true);
+                                        break;
+                                    }
+
+                                    case "kill":
+                                    {
+                                        if (!ply.Dead) NetMessage.SendData((int)PacketTypes.PlayerDamage, -1, -1, 
+                                            " was killed for an illegally prefixed "  + item.AffixName() + '.', ply.Index, 0, 9999);
+                                        
+                                        ply.SendWarningMessage("Your " + item.AffixName() + " is illegally prefixed. Dispose of it at once!");
+                                        break;
                                     }
 
                                     case "ban":
                                     {
                                         string sqlName = item.AffixName().Replace('\'', '`');
                                         TShock.Bans.AddBan(ply.IP, ply.Name, "Illegally prefixed " + sqlName);
-                                        TShock.Utils.ForceKick(ply, "Banned: Illegally prefixed " + item.AffixName(), Config.AnnouncePunishes);
-                                        return;
+                                        TShock.Utils.ForceKick(ply, "Banned: Illegally prefixed " + item.AffixName(), true);
+                                        break;
                                     }
-                                    default: return;
+                                    default: break;
                                 }
+                                break; // break the foreach
                             }
+                            #endregion
                         }
                     }
                 }
@@ -313,13 +333,22 @@ namespace PrefixPunisher
             #endregion
 
             #region handle weapons
-            else // weapon
+            else // weapon or ammo
             {
                 if (it.maxStack != 1)
                 {
-                    if (!Config.AllowPrefixedStackedWeapons) return true;
+                    if (it.ammo != 0)
+                    {
+                        if (!Config.AllowPrefixedAmmo) return true;
 
-                    else return false;
+                        else return false;
+                    }
+                    else
+                    {
+                        if (!Config.AllowPrefixedStackedWeapons) return true;
+
+                        else return false;
+                    }
                 }
                 if (it.melee)
                 {
@@ -378,7 +407,7 @@ namespace PrefixPunisher
     class ConfigFile
     {
         public string PunishType = "kick";
-        public bool AnnouncePunishes = true;
+        //public bool AnnouncePunishes = true;
         public bool AllowPrefixedArmor = false;
         public bool AllowPrefixedAmmo = false;
         public bool AllowPrefixedHarmless = true;
