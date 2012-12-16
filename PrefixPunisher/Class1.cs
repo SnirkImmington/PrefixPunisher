@@ -15,7 +15,7 @@ namespace PrefixPunisher
     [APIVersion(1, 12)]
     public class PluginMain : TerrariaPlugin
     {
-        private static ConfigFile Config { get; set; } private static DateTime LastCheck = DateTime.Now;
+        private static ConfigFile Config = new ConfigFile(); private static DateTime LastCheck = DateTime.Now;
 
         private static string ConfigPath { get { return Path.Combine(TShock.SavePath, "PrefixPunisher Config.json"); } }
 
@@ -161,11 +161,12 @@ namespace PrefixPunisher
                     case "kick": case "disable": case "ban": case "kill":
                     Console.WriteLine("Set up PrefixPunisher config."); break;
 
-                    default: Log.Error("Incorrectly set up PrefixPunisher config! Fix value \"PunishType\"!");
-                    Console.WriteLine("Incorrectly set up PrefixPunisher config! Fix value \"PunishType\"!");
+                    default: Log.Error("Incorrectly set up PrefixPunisher config! Fix value \"PunishType\" - resorting to default, \"kick\"");
+                    Console.WriteLine("Incorrectly set up PrefixPunisher config! Fix value \"PunishType\" - resorting to default, \"kick\"");
+                    Config.PunishType = "kick";
                     break;
                 }
-                Console.WriteLine("Set up PluginPunisher config.");
+                //Console.WriteLine("Set up PluginPunisher config.");
             }
             catch (Exception ex)
             {
