@@ -133,6 +133,7 @@ namespace PrefixPunisher
         {
             NetHooks.GreetPlayer += OnGreet;
             GameHooks.Update += OnUpdate;
+            GameHooks.Initialize += OnInit;
             GameHooks.PostInitialize += OnPost;
         }
 
@@ -142,9 +143,15 @@ namespace PrefixPunisher
             {
                 NetHooks.GreetPlayer -= OnGreet;
                 GameHooks.Update -= OnUpdate;
+                GameHooks.Initialize -= OnInit;
                 GameHooks.PostInitialize -= OnPost;
             }
             base.Dispose(disposing);
+        }
+
+        private void OnInit ( )
+        {
+            Commands.ChatCommands.Add(new Command("reload", reload, "reloadpp"));
         }
 
         private void OnPost ( )
@@ -304,6 +311,36 @@ namespace PrefixPunisher
         
         #endregion
 
+        private static void reload ( CommandArgs com )
+        {
+            try
+            {
+                if (File.Exists(ConfigPath))
+                {
+                    Config = ConfigFile.Read(ConfigPath);
+                }
+                Config.Write(ConfigPath);
+                switch (Config.PunishType.ToLower())
+                {
+                    case "kick":
+                    case "disable":
+                    case "ban":
+                    case "kill":
+                    com.Player.SendInfoMessage("Reloaded config file successfully."); break;
+
+                    default: Log.Error("Incorrectly set up PrefixPunisher config! Fix value \"PunishType\" - resorting to default, \"kick\"");
+                    com.Player.SendErrorMessage("Invalid \"PunishType\" - restoring to default, \"kick\"");
+                    Config.PunishType = "kick";
+                    break;
+                }
+            }
+            catch (Exception ex)
+            {
+                com.Player.SendErrorMessage("Error in PluginPunisher config file, writing in the logs.");
+                Log.Error(com.Player.Name + " used /reloadpp, there was an error: " + ex.ToString());
+            }
+        }
+
         #region utils
 
         private bool isIllegal ( Item it )
@@ -343,7 +380,7 @@ namespace PrefixPunisher
             #endregion
 
             #region handle weapons
-            else // weapon or ammo
+            else // weapon or ammo or tool
             {
                 if (it.maxStack != 1)
                 {
