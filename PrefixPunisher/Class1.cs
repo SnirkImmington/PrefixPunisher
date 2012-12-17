@@ -151,7 +151,7 @@ namespace PrefixPunisher
 
         private void OnInit ( )
         {
-            Commands.ChatCommands.Add(new Command("reload", reload, "reloadpp"));
+            Commands.ChatCommands.Add(new Command(Permissions.maintenance, reload, "reloadpp"));
         }
 
         private void OnPost ( )
