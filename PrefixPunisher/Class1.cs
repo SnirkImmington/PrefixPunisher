@@ -15,7 +15,7 @@ namespace PrefixPunisher
     [APIVersion(1, 12)]
     public class PluginMain : TerrariaPlugin
     {
-        private static ConfigFile Config = new ConfigFile(); private static DateTime LastCheck = DateTime.Now;
+        private static ConfigFile Config = new ConfigFile(); private static DateTime LastCheck = DateTime.UtcNow;
 
         private static string ConfigPath { get { return Path.Combine(TShock.SavePath, "PrefixPunisher Config.json"); } }
 
@@ -207,8 +207,7 @@ namespace PrefixPunisher
 
                         case "kick":
                         {
-                            TShock.Utils.ForceKick(tsply, "Illegally prefixed " + item.AffixName(), true);
-                            return;
+                            TShock.Utils.ForceKick(tsply, "Illegally prefixed " + item.AffixName(), true); return;
                         }
 
                         case "ban":
@@ -217,8 +216,11 @@ namespace PrefixPunisher
                             string sqlName = item.AffixName().Replace('\'', '`');
 
                             // Using the depreciated code because the current ban system doesn't kick people
-                            TShock.Bans.AddBan(tsply.IP, tsply.Name, "Illegally prefixed " + sqlName);
-                            TShock.Utils.ForceKick(tsply, "Banned: Illegally prefixed " + item.AffixName(), true);
+                            //TShock.Bans.AddBan(tsply.IP, tsply.Name, "Illegally prefixed " + sqlName);
+
+                            TShock.Utils.Ban(tsply, "Illegally prefixed " + sqlName);
+                            try { TShock.Utils.ForceKick(tsply, "Banned: Illegally prefixed " + item.AffixName(), true); }
+                            catch (Exception) { }
                             return;
                         }
                         default: return;
@@ -229,13 +231,15 @@ namespace PrefixPunisher
 
         private void OnUpdate ( )
         {
-            while (true)
+            if (( DateTime.UtcNow - LastCheck ).TotalSeconds >= 5)
             {
-                if (( DateTime.Now - LastCheck ).TotalSeconds >= 5)
+                LastCheck = DateTime.Now;
+                try
                 {
-                    LastCheck = DateTime.Now;
-                    foreach (var ply in TShock.Players.Where(p => p.RealPlayer))
+                    foreach (var ply in TShock.Players)
                     {
+                        if (!ply.RealPlayer) continue;
+
                         if (ply.Group.HasPermission("canuseillegalprefix")) continue;
 
                         var inv = ply.TPlayer.inventory.ToList();
@@ -243,6 +247,8 @@ namespace PrefixPunisher
 
                         foreach (var item in inv)
                         {
+                            if (item == null || item.type == 0) continue;
+
                             #region if it is illegal
                             if (isIllegal(item))
                             {
@@ -268,9 +274,9 @@ namespace PrefixPunisher
 
                                     case "kill":
                                     {
-                                        if (!ply.Dead) NetMessage.SendData((int)PacketTypes.PlayerDamage, -1, -1, 
+                                        if (!ply.Dead) NetMessage.SendData((int)PacketTypes.PlayerDamage, -1, -1,
                                             " was killed for an illegally prefixed "  + item.AffixName() + '.', ply.Index, 0, 9999);
-                                        
+
                                         ply.SendWarningMessage("Your " + item.AffixName() + " is illegally prefixed. Dispose of it at once!");
                                         break;
                                     }
@@ -278,8 +284,9 @@ namespace PrefixPunisher
                                     case "ban":
                                     {
                                         string sqlName = item.AffixName().Replace('\'', '`');
-                                        TShock.Bans.AddBan(ply.IP, ply.Name, "Illegally prefixed " + sqlName);
-                                        TShock.Utils.ForceKick(ply, "Banned: Illegally prefixed " + item.AffixName(), true);
+                                        TShock.Utils.Ban(ply, "Illegally prefixed " + sqlName);
+                                        try { TShock.Utils.ForceKick(ply, "Banned: Illegally prefixed " + item.AffixName(), true); }
+                                        catch (Exception) { }
                                         break;
                                     }
                                     default: break;
@@ -289,8 +296,10 @@ namespace PrefixPunisher
                             #endregion
                         }
                     }
-                }
+                } // try
+                catch (Exception) { }
             }
+            
         }
         
         #endregion
