@@ -347,7 +347,7 @@ namespace PrefixPunisher
         {
             if (it.prefix == 0) return false;
 
-            var prefix = Prefixes[it.prefix - 1];
+            var prefix = Prefixes[it.prefix - 1]; // ?
 
             if (prefix.isBad && Config.AllowAllNegativeModifiers) return false;
 
