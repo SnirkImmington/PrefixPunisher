@@ -17,95 +17,99 @@ namespace PrefixPunisher
     {
         private static ConfigFile Config = new ConfigFile(); private static DateTime LastCheck = DateTime.UtcNow;
 
+        private static Dictionary<int, byte> OkayStuff = new Dictionary<int, byte>();
+
         private static string ConfigPath { get { return Path.Combine(TShock.SavePath, "PrefixPunisher Config.json"); } }
+        private static string DataPath { get { return Path.Combine(TShock.SavePath, "PrefixPunisher OK Prefixes.txt"); } }
 
         // I have made this and class Prefix public so anyone referecing my code can make use of so many hours of typing.
-        public Prefix[] Prefixes = new Prefix[] 
+        public static Prefix[] Prefixes = new Prefix[] 
         {
             #region Prefixes!
-            new Prefix(2), // Large                 
-            new Prefix(2), // Massive
-            new Prefix(2), // Dangerous
-            new Prefix(2), // Savage
-            new Prefix(2), // Sharp
-            new Prefix(2), // Pointy                
-            new Prefix(2, true), // Tiny
-            new Prefix(2, true), // Terrible
-            new Prefix(2, true), // Small
-            new Prefix(2, true), // Dull
-            new Prefix(2, true), // Unhappy        
-            new Prefix(2), // Bulky
-            new Prefix(2, true), // Shameful
-            new Prefix(2), // Heavy
-            new Prefix(2), // Light                 
-            new Prefix(4), // Sighted              
-            new Prefix(4), // Rapid
-            new Prefix(4), // Hasty
-            new Prefix(4), // Indimidating
-            new Prefix(4), // Deadly                
-            new Prefix(4), // Staunch               
-            new Prefix(4, true), // Awful
-            new Prefix(4, true), // Lethargic
-            new Prefix(4, true), // Awkward
-            new Prefix(4), // Powerful               
-            new Prefix(4), // Frenzying            
-            new Prefix(3), // Mystic
-            new Prefix(3), // Adept
-            new Prefix(3), // Masterful
-            new Prefix(3, true), // Inept            
-            new Prefix(3, true), // Ignorant       
-            new Prefix(3, true), // Deranged
-            new Prefix(3), // Intense
-            new Prefix(3), // Taboo
-            new Prefix(3), // Celestial
-            new Prefix(3), // Furious
-            new Prefix(3), // Manic
-            new Prefix(0), // Keen
-            new Prefix(0), // Superior
-            new Prefix(0), // Forceful
-            new Prefix(0), // Hurtful
-            new Prefix(0), // Strong
-            new Prefix(0), // Unpleasant
-            new Prefix(0, true), // Broken
-            new Prefix(0, true), // Damaged
-            new Prefix(0, true), // Weak
-            new Prefix(0, true), // Shoddy
-            new Prefix(0), // Ruthless
-            new Prefix(5), // Quick
-            new Prefix(5), // Deadly
-            new Prefix(5), // Agile
-            new Prefix(5), // Nimble
-            new Prefix(5), // Murderous
-            new Prefix(5, true), // Slow
-            new Prefix(5, true), // $luggish
-            new Prefix(5, true), // Lazy
-            new Prefix(5, true), // Annoying
-            new Prefix(5), // Nasty
-            new Prefix(0), // Godly
-            new Prefix(0), // Demonic
-            new Prefix(0), // Zealous
-            new Prefix(1), // Hard
-            new Prefix(1), // Guarding
-            new Prefix(1), // Armored
-            new Prefix(1), // Warding
-            new Prefix(1), // Arcane
-            new Prefix(1), // Precise
-            new Prefix(1), // Lucky
-            new Prefix(1), // Jagged
-            new Prefix(1), // Spiked
-            new Prefix(1), // Angry
-            new Prefix(1), // Menacing
-            new Prefix(1), // Brisk
-            new Prefix(1), // Fleeting
-            new Prefix(1), // Hasty
-            new Prefix(1), // Quick
-            new Prefix(1), // Wild
-            new Prefix(1), // Rash
-            new Prefix(1), // Intrepid
-            new Prefix(1), // Violent
-            new Prefix(2), // Legendary
-            new Prefix(4), // Unreal
-            new Prefix(3), // Mythical
+            new Prefix("None", 0, false), // none
+            new Prefix("Large", 2), // Large                 1
+            new Prefix("Massive", 2), // Massive
+            new Prefix("Dangerous", 2), // Dangerous
+            new Prefix("Savage", 2), // Savage
+            new Prefix("Sharp", 2), // Sharp                5
+            new Prefix("Pointy", 2), // Pointy                
+            new Prefix("Tiny", 2, true), // Tiny
+            new Prefix("Terrible", 2, true), // Terrible
+            new Prefix("Small", 2, true), // Small
+            new Prefix("Dull", 2, true), // Dull            10
+            new Prefix("Unhappy", 2, true), // Unhappy         
+            new Prefix("Bulky", 2), // Bulky
+            new Prefix("Shameful", 2, true), // Shameful
+            new Prefix("Heavy", 2), // Heavy
+            new Prefix("Light", 2), // Light                15 
+            new Prefix("Sighted", 4), // Sighted              
+            new Prefix("Rapid", 4), // Rapid
+            new Prefix("Hasty", 4), // Hasty
+            new Prefix("Intimidating", 4), // Indimidating
+            new Prefix("Deadly", 4), // Deadly                20
+            new Prefix("Staunch", 4), // Staunch               
+            new Prefix("Awful", 4, true), // Awful
+            new Prefix("Lethargic", 4, true), // Lethargic
+            new Prefix("Awkward", 4, true), // Awkward
+            new Prefix("Powerful", 4), // Powerful             25      
+            new Prefix("Mystic", 3), // Mystic
+            new Prefix("Adept", 3), // Adept
+            new Prefix("Masterful", 3), // Masterful
+            new Prefix("Inept", 3, true), // Inept            
+            new Prefix("Ignorant", 3, true), // Ignorant      30 
+            new Prefix("Deranged", 3, true), // Deranged
+            new Prefix("Intense", 3), // Intense
+            new Prefix("Taboo", 3), // Taboo
+            new Prefix("Celestial", 3), // Celestial            
+            new Prefix("Furious", 3), // Furious                35
+            new Prefix("Keen", 0), // Keen
+            new Prefix("Superior", 0), // Superior
+            new Prefix("Forceful", 0), // Forceful              
+            new Prefix("Broken", 0, true), // Broken
+            new Prefix("Damaged", 0, true), // Damaged          40
+            new Prefix("Shoddy", 0, true), // Shoddy
+            new Prefix("Quick", 5), // Quick
+            new Prefix("Deadly", 5), // Deadly                  43
+            new Prefix("Agile", 5), // Agile
+            new Prefix("Nimble", 5), // Nimble                  45
+            new Prefix("Murderous", 5), // Murderous
+            new Prefix("Slow", 5, true), // Slow
+            new Prefix("Sluggish", 5),
+            new Prefix("Lazy", 5, true),
+            new Prefix("Annoying", 5, true), //                 50
+            new Prefix("Nasty", 5),
+            new Prefix("Manic", 3), // new position\
+            new Prefix("Hurtful", 0),                           
+            new Prefix("Strong", 0),
+            new Prefix("Unpleasant", 0),                        //55
+            new Prefix("Weak", 0, true), 
+            new Prefix("Ruthless", 0),
+            new Prefix("Frenzying", 4), // Frenzying is moved here!
+            new Prefix("Godly", 0), // Godly                    60
+            new Prefix("Demonic", 0), // Demonic                //60
+            new Prefix("Zealous", 0), // Zealous
+            new Prefix("Hard", 1), // Hard
+            new Prefix("Guarding", 1), // Guarding
+            new Prefix("Armored", 1), // Armored                65
+            new Prefix("Warding", 1), // Warding
+            new Prefix("Arcane", 1), // Arcane
+            new Prefix("Precise", 1), // Precise
+            new Prefix("Lucky", 1), // Lucky
+            new Prefix("Jagged", 1), // Jagged                  70
+            new Prefix("Spiked", 1), // Spiked
+            new Prefix("Angry", 1), // Angry
+            new Prefix("Menacing", 1), // Menacing
+            new Prefix("Brisk", 1), // Brisk
+            new Prefix("Fleeting", 1), // Fleeting              75
+            new Prefix("Hasty", 1), // Hasty
+            new Prefix("Quick", 1), // Quick
+            new Prefix("Wild", 1), // Wild
+            new Prefix("Rash", 1), // Rash
+            new Prefix("Intrepid", 1), // Intrepid              80
+            new Prefix("Violent", 1), // Violent
+            new Prefix("Legendary", 2), // Legendary
+            new Prefix("Unreal", 4), // Unreal
+            new Prefix("Mythical", 3), // Mythical
             #endregion
         };
 
@@ -180,6 +184,15 @@ namespace PrefixPunisher
                 Console.WriteLine("Error in PluginPunisher config file, writing logs.");
                 Log.Error(ex.ToString());
             }
+
+            try
+            { setupDB(); }
+
+            catch (Exception ex)
+            { 
+                Console.WriteLine("Error in PluginPunisher Okay Items database, ignoring it and writing logs.");
+                Log.Error(ex.ToString());
+            }
         }
 
         #endregion
@@ -196,9 +209,12 @@ namespace PrefixPunisher
 
             foreach (var item in inv)
             {
-                if (isIllegal(item))
+                if (OkayStuff.Count(p => p.Key == item.type && p.Value == item.prefix) != 0) continue;
+
+                var chek = isIllegal(item);
+                if (chek != "")
                 {
-                    //var name = tsply.Name;
+                    var message = "illegal"+chek+" - " + item.AffixName();
 
                     switch (Config.PunishType.ToLower())
                     {
@@ -208,25 +224,25 @@ namespace PrefixPunisher
                             tsply.SetBuff(33, 530, true);
                             tsply.SetBuff(32, 530, true);
                             tsply.SetBuff(23, 330, true);
-                            tsply.SendWarningMessage("Your " + item.AffixName() + " is illegally prefixed. Dispose of it at once!");
+                            tsply.SendWarningMessage("This server does not allow " + message +". Dispose of it at once!");
                             return;
                         }
 
                         case "kick":
                         {
-                            TShock.Utils.ForceKick(tsply, "Illegally prefixed " + item.AffixName(), true); return;
+                            TShock.Utils.ForceKick(tsply, message, true); return;
                         }
 
                         case "ban":
                         {
                             // We need all plugins that interface with SQL to sanitize.
-                            string sqlName = item.AffixName().Replace('\'', '`');
+                            string sqlName = message.Replace('\'', '`');
 
                             // Using the depreciated code because the current ban system doesn't kick people
                             //TShock.Bans.AddBan(tsply.IP, tsply.Name, "Illegally prefixed " + sqlName);
 
-                            TShock.Utils.Ban(tsply, "Illegally prefixed " + sqlName);
-                            try { TShock.Utils.ForceKick(tsply, "Banned: Illegally prefixed " + item.AffixName(), true); }
+                            TShock.Utils.Ban(tsply, sqlName);
+                            try { TShock.Utils.ForceKick(tsply, "Banned: " + message, true); }
                             catch (Exception) { }
                             return;
                         }
@@ -255,11 +271,12 @@ namespace PrefixPunisher
                         foreach (var item in inv)
                         {
                             if (item == null || item.type == 0) continue;
-
+                            if (OkayStuff.Count(p => p.Key == item.type && p.Value == item.prefix) != 0) continue;
                             #region if it is illegal
-                            if (isIllegal(item))
+                            var chek = isIllegal(item);
+                            if (chek != "")
                             {
-                                //var name = ply.Name;
+                                var message = "illegal" + chek + " - " + item.AffixName();
 
                                 switch (Config.PunishType.ToLower())
                                 {
@@ -269,7 +286,7 @@ namespace PrefixPunisher
                                         ply.SetBuff(33, 530, true);
                                         ply.SetBuff(32, 530, true);
                                         ply.SetBuff(23, 330, true);
-                                        ply.SendWarningMessage("Your " + item.AffixName() + " is illegally prefixed. Dispose of it at once!");
+                                        ply.SendWarningMessage("This server does not allow " + item.AffixName() + " is illegally prefixed. Dispose of it at once!");
                                         break;
                                     }
 
@@ -339,17 +356,24 @@ namespace PrefixPunisher
                 com.Player.SendErrorMessage("Error in PluginPunisher config file, writing in the logs.");
                 Log.Error(com.Player.Name + " used /reloadpp, there was an error: " + ex.ToString());
             }
+
+            try { setupDB(); com.Player.SendSuccessMessage("Reloaded Okay Prefixes Database correctly!"); }
+            catch (Exception ex)
+            {
+                com.Player.SendErrorMessage("Error in PluginPunisher Okay Prefixes database, writing in the logs.");
+                Log.Error(com.Player.Name + " used /reloadpp, there was an error: " + ex.ToString());
+            }
         }
 
         #region utils
 
-        private bool isIllegal ( Item it )
+        private static string isIllegal ( Item it )
         {
-            if (it.prefix == 0) return false;
+            if (it.prefix == 0) return "";
 
-            var prefix = Prefixes[it.prefix - 1]; // ?
+            var prefix = Prefixes[it.prefix]; // ?
 
-            if (prefix.isBad && Config.AllowAllNegativeModifiers) return false;
+            if (prefix.isBad && Config.AllowAllNegativeModifiers) return "";
 
             #region handle non weapons
             if (it.damage == -1)
@@ -358,23 +382,23 @@ namespace PrefixPunisher
                 {
                     if (prefix.ItemType != 1)
                     {
-                        if (!Config.AllowItemsWithPrefixesOfOtherTypes) return true;
+                        if (!Config.AllowItemsWithPrefixesOfOtherTypes) return " prefix type";
                         
-                        else return false;
+                        else return "";
                     }
-                    else return false;
+                    else return "";
                 }
                 else if (it.defense != 0) // it must be armor
                 {
-                    if (!Config.AllowPrefixedArmor) return true;
+                    if (!Config.AllowPrefixedArmor) return "ly prefixed armor";
 
-                    else return false;
+                    else return "";
                 }
                 else
                 {
-                    if (!Config.AllowPrefixedHarmless) return true;
+                    if (!Config.AllowPrefixedHarmless) return "ly prefixed harmless item";
 
-                    else return false;
+                    else return "";
                 }
             }
             #endregion
@@ -386,15 +410,15 @@ namespace PrefixPunisher
                 {
                     if (it.ammo != 0)
                     {
-                        if (!Config.AllowPrefixedAmmo) return true;
+                        if (!Config.AllowPrefixedAmmo) return "ly prefixed ammo";
 
-                        else return false;
+                        else return "";
                     }
                     else
                     {
-                        if (!Config.AllowPrefixedStackedWeapons) return true;
+                        if (!Config.AllowPrefixedStackedWeapons) return "ly prefixed stacked weapon";
 
-                        else return false;
+                        else return "";
                     }
                 }
                 if (it.melee)
@@ -403,23 +427,23 @@ namespace PrefixPunisher
                     {
                         if (prefix.ItemType != 0)
                         {
-                            if (!Config.AllowItemsWithPrefixesOfOtherTypes) return true;
+                            if (!Config.AllowItemsWithPrefixesOfOtherTypes) return " prefix type";
 
-                            else return false;
+                            else return "";
                         }
-                        else return false;
+                        else return "";
                     }
                     else // it must be a sword type, 1 or 3, both are ok
                     {
                         if (prefix.ItemType == 0 || prefix.ItemType == 2 || prefix.ItemType == 5)
                         {
-                            return false;
+                            return "";
                         }
                         else
                         {
-                            if (!Config.AllowItemsWithPrefixesOfOtherTypes) return true;
+                            if (!Config.AllowItemsWithPrefixesOfOtherTypes) return " prefix type";
 
-                            else return false;
+                            else return "";
                         }
                     }
                 }
@@ -427,25 +451,82 @@ namespace PrefixPunisher
                 {
                     if (prefix.ItemType != 0 && prefix.ItemType != 5 && prefix.ItemType != 3)
                     {
-                        if (!Config.AllowItemsWithPrefixesOfOtherTypes) return true;
+                        if (!Config.AllowItemsWithPrefixesOfOtherTypes) return " prefix type";
 
-                        else return false;
+                        else return "";
                     }
-                    else return false;
+                    else return "";
                 }
                 else if (it.ranged)
                 {
                     if (prefix.ItemType != 4 && prefix.ItemType != 5 && prefix.ItemType != 0)
                     {
-                        if (!Config.AllowItemsWithPrefixesOfOtherTypes) return true;
+                        if (!Config.AllowItemsWithPrefixesOfOtherTypes) return " prefix type";
 
-                        else return false;
+                        else return "";
                     }
-                    else return false;
+                    else return "";
                 }
-                else return false; // never happens
+                else return ""; // never happens
             }
             #endregion
+        }
+
+        private static void readDB ( )
+        {
+            foreach (var line in File.ReadAllLines(DataPath).Where(l => l[0] != '#'))
+            {
+                //line.Trim(); / not really needed
+                var split = line.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                if (split.Length != 2)
+                {
+                    Console.WriteLine("There was an error parsing \""+line+"\", skipping that one.");
+                    continue;
+                }
+
+                var item = TShock.Utils.GetItemByIdOrName(split[0]);
+                if (item.Count != 1)
+                {
+                    Console.WriteLine("Unable to parse the item name in \""+line+"\", skipping that one.");
+                    continue;
+                }
+                byte prefix = 0;
+                if (!byte.TryParse(split[1], out prefix))
+                {
+                    Console.WriteLine("Unable to parse the prefix in \""+line+"\" (it must be a number), skipping that one.");
+                    continue;
+                }
+
+                if (prefix < 1 || prefix > 84)
+                {
+                    Console.WriteLine("Prefix number is invalid in \""+line+"\" (must be between 1 and 84), skipping that one.");
+                    continue;
+                }
+
+                OkayStuff.Add(item[0].type, prefix);
+            }
+
+        }
+
+        private static void writeDB ( )
+        {
+            File.WriteAllLines(DataPath, new string[] {
+                "# This config file is where you can add specific item/prefix combinations that are allowed by the plugin.",
+                "# The format is: ItemName:PrefixNumber and write one per line!",
+                "# Example: Neptune's Shell:1",
+                "# This will allow Large Neptune Shells on the server even if they are normally banned.",
+                "# Also, feel free to add notes, as long as they begin with \"#\"! Make sure not to remove the \"#\" from these lines."});
+
+        }
+
+        private static void setupDB ( )
+        {
+            OkayStuff.Clear();
+            if (File.Exists(DataPath))
+            {
+                readDB();
+            }
+            else writeDB();
         }
 
         #endregion
@@ -521,7 +602,12 @@ namespace PrefixPunisher
         /// </summary>
         public bool isBad { get; set; }
 
-        public Prefix ( byte itemtype, bool isbad = false)
-        { ItemType = itemtype; isBad = isbad; }
+        /// <summary>
+        /// Returns the name of the prefix. Basically for debug purposes.
+        /// </summary>
+        public string Name { get; set; }
+
+        public Prefix (string name, byte itemtype, bool isbad = false)
+        { ItemType = itemtype; isBad = isbad; Name = name; }
 	}
 }
