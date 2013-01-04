@@ -17,12 +17,15 @@ namespace PrefixPunisher
     {
         private static ConfigFile Config = new ConfigFile(); private static DateTime LastCheck = DateTime.UtcNow;
 
-        private static Dictionary<int, byte> OkayStuff = new Dictionary<int, byte>();
+        //private static Dictionary<int, byte> OkayStuff = new Dictionary<int, byte>();
+        private static List<OkayCombo> OkayStuff = new List<OkayCombo>();
 
         private static string ConfigPath { get { return Path.Combine(TShock.SavePath, "PrefixPunisher Config.json"); } }
         private static string DataPath { get { return Path.Combine(TShock.SavePath, "PrefixPunisher OK Prefixes.txt"); } }
 
         // I have made this and class Prefix public so anyone referecing my code can make use of so many hours of typing.
+        // And also, Inan, this code is "clean" :P
+        // I admit that it took to much time to be practical but simple funtionality sometimes takes lots of coding.
         public static Prefix[] Prefixes = new Prefix[] 
         {
             #region Prefixes!
@@ -209,8 +212,6 @@ namespace PrefixPunisher
 
             foreach (var item in inv)
             {
-                if (OkayStuff.Count(p => p.Key == item.type && p.Value == item.prefix) != 0) continue;
-
                 var chek = isIllegal(item);
                 if (chek != "")
                 {
@@ -271,7 +272,6 @@ namespace PrefixPunisher
                         foreach (var item in inv)
                         {
                             if (item == null || item.type == 0) continue;
-                            if (OkayStuff.Count(p => p.Key == item.type && p.Value == item.prefix) != 0) continue;
                             #region if it is illegal
                             var chek = isIllegal(item);
                             if (chek != "")
@@ -371,7 +371,10 @@ namespace PrefixPunisher
         {
             if (it.prefix == 0) return "";
 
-            var prefix = Prefixes[it.prefix]; // ?
+            // I want to marry a lambda expression.
+            if (OkayStuff.Any(o => o.Prefix == it.prefix && o.ItemType == it.type)) return "";
+
+            var prefix = Prefixes[it.prefix]; 
 
             if (prefix.isBad && Config.AllowAllNegativeModifiers) return "";
 
@@ -476,8 +479,7 @@ namespace PrefixPunisher
         {
             foreach (var line in File.ReadAllLines(DataPath).Where(l => l[0] != '#'))
             {
-                //line.Trim(); / not really needed
-                var split = line.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                var split = line.Split(':');
                 if (split.Length != 2)
                 {
                     Console.WriteLine("There was an error parsing \""+line+"\", skipping that one.");
@@ -503,7 +505,7 @@ namespace PrefixPunisher
                     continue;
                 }
 
-                OkayStuff.Add(item[0].type, prefix);
+                OkayStuff.Add(new OkayCombo(item[0].type, prefix));
             }
 
         }
@@ -610,4 +612,19 @@ namespace PrefixPunisher
         public Prefix (string name, byte itemtype, bool isbad = false)
         { ItemType = itemtype; isBad = isbad; Name = name; }
 	}
+
+    /// <summary>
+    /// Because dictionaries are secretly really bitchy.
+    /// </summary>
+    class OkayCombo
+    {
+        public int ItemType { get; set; }
+        public byte Prefix { get; set; }
+
+        public OkayCombo ( int type, byte prefix )
+        {
+            ItemType = type;
+            Prefix = prefix;
+        }
+    }
 }
