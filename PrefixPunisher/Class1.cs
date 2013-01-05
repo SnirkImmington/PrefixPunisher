@@ -17,7 +17,6 @@ namespace PrefixPunisher
     {
         private static ConfigFile Config = new ConfigFile(); private static DateTime LastCheck = DateTime.UtcNow;
 
-        //private static Dictionary<int, byte> OkayStuff = new Dictionary<int, byte>();
         private static List<OkayCombo> OkayStuff = new List<OkayCombo>();
 
         private static string ConfigPath { get { return Path.Combine(TShock.SavePath, "PrefixPunisher Config.json"); } }
@@ -65,23 +64,24 @@ namespace PrefixPunisher
             new Prefix("Taboo", 3), // Taboo
             new Prefix("Celestial", 3), // Celestial            
             new Prefix("Furious", 3), // Furious                35
+            new Prefix("Manic", 3), // f u regigit
             new Prefix("Keen", 0), // Keen
             new Prefix("Superior", 0), // Superior
             new Prefix("Forceful", 0), // Forceful              
             new Prefix("Broken", 0, true), // Broken
-            new Prefix("Damaged", 0, true), // Damaged          40
+            new Prefix("Damaged", 0, true), // Damaged          
             new Prefix("Shoddy", 0, true), // Shoddy
             new Prefix("Quick", 5), // Quick
-            new Prefix("Deadly", 5), // Deadly                  43
+            new Prefix("Deadly", 5), // Deadly                  
             new Prefix("Agile", 5), // Agile
-            new Prefix("Nimble", 5), // Nimble                  45
+            new Prefix("Nimble", 5), // Nimble                  
             new Prefix("Murderous", 5), // Murderous
             new Prefix("Slow", 5, true), // Slow
             new Prefix("Sluggish", 5),
             new Prefix("Lazy", 5, true),
-            new Prefix("Annoying", 5, true), //                 50
+            new Prefix("Annoying", 5, true), //                 
             new Prefix("Nasty", 5),
-            new Prefix("Manic", 3), // new position\
+            new Prefix("Manic", 3), // new position?
             new Prefix("Hurtful", 0),                           
             new Prefix("Strong", 0),
             new Prefix("Unpleasant", 0),                        //55
@@ -255,7 +255,7 @@ namespace PrefixPunisher
 
         private void OnUpdate ( )
         {
-            if (( DateTime.UtcNow - LastCheck ).TotalSeconds >= 5)
+            if (( DateTime.UtcNow - LastCheck ).TotalSeconds >= 2)
             {
                 LastCheck = DateTime.Now;
                 try
@@ -272,6 +272,7 @@ namespace PrefixPunisher
                         foreach (var item in inv)
                         {
                             if (item == null || item.type == 0) continue;
+
                             #region if it is illegal
                             var chek = isIllegal(item);
                             if (chek != "")
@@ -283,39 +284,39 @@ namespace PrefixPunisher
                                     case "disable":
                                     {
                                         ply.LastThreat = DateTime.UtcNow;
-                                        ply.SetBuff(33, 530, true);
-                                        ply.SetBuff(32, 530, true);
-                                        ply.SetBuff(23, 330, true);
-                                        ply.SendWarningMessage("This server does not allow " + item.AffixName() + " is illegally prefixed. Dispose of it at once!");
+                                        ply.SetBuff(33, 230, true);
+                                        ply.SetBuff(32, 230, true);
+                                        ply.SetBuff(23, 230, true);
+                                        ply.SendWarningMessage("This server does not allow " + message+" - remove it at once!");
                                         break;
                                     }
 
                                     case "kick":
                                     {
-                                        TShock.Utils.ForceKick(ply, "Illegally prefixed " + item.AffixName(), true);
+                                        TShock.Utils.ForceKick(ply, message, true);
                                         break;
                                     }
 
                                     case "kill":
                                     {
                                         if (!ply.Dead) NetMessage.SendData((int)PacketTypes.PlayerDamage, -1, -1,
-                                            " was killed for an illegally prefixed "  + item.AffixName() + '.', ply.Index, 0, 9999);
+                                            " was killed for  "  + message + '.', ply.Index, 0, 9999);
 
-                                        ply.SendWarningMessage("Your " + item.AffixName() + " is illegally prefixed. Dispose of it at once!");
+                                        ply.SendWarningMessage("This server doesnot allow " + message + ". Dispose of it at once!");
                                         break;
                                     }
 
                                     case "ban":
                                     {
-                                        string sqlName = item.AffixName().Replace('\'', '`');
-                                        TShock.Utils.Ban(ply, "Illegally prefixed " + sqlName);
-                                        try { TShock.Utils.ForceKick(ply, "Banned: Illegally prefixed " + item.AffixName(), true); }
+                                        string sqlName = message.Replace('\'', '`');
+                                        TShock.Utils.Ban(ply, sqlName);
+                                        try { TShock.Utils.ForceKick(ply, "Banned: " + message, true); }
                                         catch (Exception) { }
                                         break;
                                     }
                                     default: break;
                                 }
-                                break; // break the foreach
+                                break; // break the foreach item
                             }
                             #endregion
                         }
@@ -357,7 +358,7 @@ namespace PrefixPunisher
                 Log.Error(com.Player.Name + " used /reloadpp, there was an error: " + ex.ToString());
             }
 
-            try { setupDB(); com.Player.SendSuccessMessage("Reloaded Okay Prefixes Database correctly!"); }
+            try { setupDB(); com.Player.SendSuccessMessage("Reloaded Okay Prefixes Database correctly! Check the console to see what was set up."); }
             catch (Exception ex)
             {
                 com.Player.SendErrorMessage("Error in PluginPunisher Okay Prefixes database, writing in the logs.");
@@ -504,10 +505,10 @@ namespace PrefixPunisher
                     Console.WriteLine("Prefix number is invalid in \""+line+"\" (must be between 1 and 84), skipping that one.");
                     continue;
                 }
-
+                Console.WriteLine("Added combination: Item = {0}, Prefix = {1} ({2})".SFormat(item[0].name, prefix, Prefixes[prefix].Name));
                 OkayStuff.Add(new OkayCombo(item[0].type, prefix));
             }
-
+            Console.WriteLine("If there are errors in the item combinations, please tell Snirk.");
         }
 
         private static void writeDB ( )
