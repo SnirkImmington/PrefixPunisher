@@ -9,8 +9,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Punishes people for illegal prefixes!")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Snirk Immington")]
-[assembly: AssemblyProduct("PrefixKicker")]
-[assembly: AssemblyCopyright("Copyright © Hewlett-Packard 2012")]
+[assembly: AssemblyProduct("PrefixKPunisher")]
+[assembly: AssemblyCopyright("Copyright © Immington Industries 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.2")]
-[assembly: AssemblyFileVersion("2.2")]
+[assembly: AssemblyVersion("2.3")]
+[assembly: AssemblyFileVersion("2.3")]

@@ -24,7 +24,7 @@ namespace PrefixPunisher
 
         // I have made this and class Prefix public so anyone referecing my code can make use of so many hours of typing.
         // And also, Inan, this code is "clean" :P
-        // I admit that it took to much time to be practical but simple funtionality sometimes takes lots of coding.
+        // I admit that it took too much time to be practical but simple funtionality sometimes takes lots of coding.
         public static Prefix[] Prefixes = new Prefix[] 
         {
             #region Prefixes!
@@ -617,10 +617,10 @@ namespace PrefixPunisher
     /// <summary>
     /// Because dictionaries are secretly really bitchy.
     /// </summary>
-    class OkayCombo
+    struct OkayCombo
     {
-        public int ItemType { get; set; }
-        public byte Prefix { get; set; }
+        public int ItemType;
+        public byte Prefix;
 
         public OkayCombo ( int type, byte prefix )
         {
