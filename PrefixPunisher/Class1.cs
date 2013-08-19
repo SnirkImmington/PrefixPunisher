@@ -170,7 +170,7 @@ namespace PrefixPunisher
                     Config = ConfigFile.Read(ConfigPath);
                 }
                 Config.Write(ConfigPath);
-                switch (Config.PunishType.ToLower())
+                if (!Config.DoVanillaStyleAcutalWorkingRedigitIsLazyPrefixChecksBecauseThisWholeDatabaseThingJustIsntworkingOut) switch (Config.PunishType.ToLower())
                 {
                     case "kick": case "disable": case "ban": case "kill":
                     Console.WriteLine("Set up PrefixPunisher config."); break;
@@ -204,53 +204,63 @@ namespace PrefixPunisher
 
         private void OnGreet ( int who, HandledEventArgs args )
         {
-            if (TShock.Players[who].Group.HasPermission("canuseillegalprefix")) return;
-
-            var tsply = TShock.Players[who];
-            var inv = tsply.TPlayer.inventory.ToList();
-            inv.AddRange(tsply.TPlayer.armor);
-
-            foreach (var item in inv)
+            try
             {
-                var chek = isIllegal(item);
-                if (chek != "")
+                if (TShock.Players[who].Group.HasPermission("canuseillegalprefix")) return;
+
+                var tsply = TShock.Players[who];
+                var inv = tsply.TPlayer.inventory.ToList();
+                inv.AddRange(tsply.TPlayer.armor);
+
+                foreach (var item in inv)
                 {
-                    var message = "illegal"+chek+" - " + item.AffixName();
-
-                    switch (Config.PunishType.ToLower())
+                    string chek = "";
+                    //var chek = isIllegal(item);
+                    if (Config.DoVanillaStyleAcutalWorkingRedigitIsLazyPrefixChecksBecauseThisWholeDatabaseThingJustIsntworkingOut)
                     {
-                        case "disable":
+                        if (OldCheck(item)) chek = "";
+                        else chek = "illegal prefix on " +  item.AffixName();
+                    }
+                    if (chek != "")
+                    {
+                        var message = "illegal" + chek + " - " + item.AffixName();
+
+                        switch (Config.PunishType.ToLower())
                         {
-                            tsply.LastThreat = DateTime.UtcNow;
-                            tsply.SetBuff(33, 530, true);
-                            tsply.SetBuff(32, 530, true);
-                            tsply.SetBuff(23, 330, true);
-                            tsply.SendWarningMessage("This server does not allow " + message +". Dispose of it at once!");
-                            return;
+                            case "disable":
+                                {
+                                    tsply.LastThreat = DateTime.UtcNow;
+                                    tsply.SetBuff(33, 530, true);
+                                    tsply.SetBuff(32, 530, true);
+                                    tsply.SetBuff(23, 330, true);
+                                    tsply.SendWarningMessage("This server does not allow " + message + ". Dispose of it at once!");
+                                    return;
+                                }
+
+                            case "kick":
+                                {
+                                    TShock.Utils.ForceKick(tsply, message, true); return;
+                                }
+
+                            case "ban":
+                                {
+                                    // We need all plugins that interface with SQL to sanitize.
+                                    string sqlName = message.Replace('\'', '`');
+
+                                    // Using the depreciated code because the current ban system doesn't kick people
+                                    //TShock.Bans.AddBan(tsply.IP, tsply.Name, "Illegally prefixed " + sqlName);
+
+                                    TShock.Utils.Ban(tsply, sqlName);
+                                    try { TShock.Utils.ForceKick(tsply, "Banned: " + message, true); }
+                                    catch (Exception) { }
+                                    return;
+                                }
+                            default: return;
                         }
-
-                        case "kick":
-                        {
-                            TShock.Utils.ForceKick(tsply, message, true); return;
-                        }
-
-                        case "ban":
-                        {
-                            // We need all plugins that interface with SQL to sanitize.
-                            string sqlName = message.Replace('\'', '`');
-
-                            // Using the depreciated code because the current ban system doesn't kick people
-                            //TShock.Bans.AddBan(tsply.IP, tsply.Name, "Illegally prefixed " + sqlName);
-
-                            TShock.Utils.Ban(tsply, sqlName);
-                            try { TShock.Utils.ForceKick(tsply, "Banned: " + message, true); }
-                            catch (Exception) { }
-                            return;
-                        }
-                        default: return;
                     }
                 }
             }
+            catch (Exception ex) { Log.Error(ex.ToString()); } // Errors were reported with config switchup.
         }
 
         private void OnUpdate ( )
@@ -532,13 +542,23 @@ namespace PrefixPunisher
             else writeDB();
         }
 
+        private static bool OldCheck(Item it)
+        {
+            var prefix = it.prefix;
+
+            it.Prefix(prefix);
+            if (it.prefix == prefix) return true;
+
+            else return false;
+        }
+
         #endregion
     }
 
     class ConfigFile
     {
         public string PunishType = "kick";
-        //public bool AnnouncePunishes = true;
+        public bool DoVanillaStyleAcutalWorkingRedigitIsLazyPrefixChecksBecauseThisWholeDatabaseThingJustIsntworkingOut = true;
         public bool AllowPrefixedArmor = false;
         public bool AllowPrefixedAmmo = false;
         public bool AllowPrefixedHarmless = true;
